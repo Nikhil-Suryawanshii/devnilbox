@@ -65,8 +65,8 @@ class MediaRepository extends Repository
             $type = in_array($extension, ['jpg', 'png', 'jpeg', 'gif']) ? 'image' : $extension;
         }
 
-        if (Storage::exists($media->src)) {
-            Storage::delete($media->src);
+        if (Storage::disk('public')->exists($media->src)) {
+            Storage::disk('public')->delete($media->src);
         }
 
         $media->update([

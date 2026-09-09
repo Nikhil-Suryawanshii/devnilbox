@@ -78,8 +78,8 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $shopID = $product->shop_id;
-        if ($product->media && Storage::exists($product->media->src)) {
-            Storage::delete($product->media->src);
+        if ($product->media && Storage::disk('public')->exists($product->media->src)) {
+            Storage::disk('public')->delete($product->media->src);
         }
         $product->media()->delete();
         $product->sizes()->delete();
@@ -88,8 +88,8 @@ class ProductController extends Controller
         $product->categories()->detach();
 
         foreach ($product->medias as $media) {
-            if ($media && Storage::exists($media->src)) {
-                Storage::delete($media->src);
+            if ($media && Storage::disk('public')->exists($media->src)) {
+                Storage::disk('public')->delete($media->src);
             }
             $media->delete();
         }

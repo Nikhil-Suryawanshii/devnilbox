@@ -241,7 +241,7 @@
                                         @foreach ($product->attachments as $attachment)
                                             @php
                                                 $source = asset('default/upload.png');
-                                                if (Storage::exists($attachment->src)) {
+                                                if (Storage::disk('public')->exists($attachment->src)) {
                                                     $source = getFileImages($attachment);
                                                 }
                                             @endphp
@@ -534,7 +534,7 @@
                                     @foreach ($product->medias as $media)
                                         @php
                                             $source = asset('default/upload.png');
-                                            if (Storage::exists($media->src)) {
+                                            if (Storage::disk('public')->exists($media->src)) {
                                                 $source = Storage::url($media->src);
                                             }
                                         @endphp

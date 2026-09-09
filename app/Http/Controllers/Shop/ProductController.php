@@ -213,8 +213,8 @@ class ProductController extends Controller
     public function thumbnailDestroy(Product $product, Media $media)
     {
         $product->medias()->detach($media->id);
-        if (Storage::exists($media->src)) {
-            Storage::delete($media->src);
+        if (Storage::disk('public')->exists($media->src)) {
+            Storage::disk('public')->delete($media->src);
         }
 
         $media->delete();
@@ -225,8 +225,8 @@ class ProductController extends Controller
     public function attachmentDestroy(Product $product, Media $media)
     {
         $product->attachments()->detach($media->id);
-        if (Storage::exists($media->src)) {
-            Storage::delete($media->src);
+        if (Storage::disk('public')->exists($media->src)) {
+            Storage::disk('public')->delete($media->src);
         }
 
         $media->delete();

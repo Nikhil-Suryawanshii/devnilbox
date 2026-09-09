@@ -15,7 +15,7 @@ class PublicMedia
             return false;
         }
 
-        return is_file(storage_path('app/public/'.$src));
+        return \Illuminate\Support\Facades\Storage::disk('public')->exists($src);
     }
 
     public static function url(?string $src, ?string $default = 'default/default.jpg'): string

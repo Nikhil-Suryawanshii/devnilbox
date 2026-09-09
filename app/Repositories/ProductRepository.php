@@ -641,8 +641,8 @@ class ProductRepository extends Repository
 
             $product->medias()->detach($media->id);
 
-            if (Storage::exists($media->src)) {
-                Storage::delete($media->src);
+            if (Storage::disk('public')->exists($media->src)) {
+                Storage::disk('public')->delete($media->src);
             }
 
             $media->delete();
@@ -674,8 +674,8 @@ class ProductRepository extends Repository
 
             $product->attachments()->detach($media->id);
 
-            if (Storage::exists($media->src)) {
-                Storage::delete($media->src);
+            if (Storage::disk('public')->exists($media->src)) {
+                Storage::disk('public')->delete($media->src);
             }
 
             $media->delete();
