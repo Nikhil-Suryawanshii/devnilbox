@@ -36,4 +36,4 @@ Ready eCommerce-Admin with Customer Website/
 /node_modules/
 .env
 /public/hot
-/public/storage
+# /public/storage  <-- removed: we track uploaded images directly in public/storage
