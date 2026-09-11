@@ -42,8 +42,9 @@ class ForgotPasswordController extends Controller
         // Send OTP via SMS (Twilio)
         try {
             $this->otpService->sendForgotPasswordOTP($phone, $otp);
-        } catch (\Throwable) {
-            return $this->json('Failed to send OTP via SMS. Please try again.', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $e) {
+            $msg = app()->environment('local') ? $e->getMessage() : 'Failed to send OTP via SMS. Please try again.';
+            return $this->json('Failed to send OTP via SMS. Error: ' . $msg, [], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // Send same OTP via Email (Hostinger SMTP)

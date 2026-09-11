@@ -10,15 +10,15 @@ use GuzzleHttp\Client as GuzzleHttp;
 class TwilioOTPService
 {
     protected Client $twilioClient;
-    protected string $fromPhone;
+    protected ?string $fromPhone;
 
     public function __construct()
 {
     $guzzle = new GuzzleHttp();
 
     $this->twilioClient = new Client(
-        config('twilio.sid'),
-        config('twilio.token'),
+        (string) config('twilio.sid'),
+        (string) config('twilio.token'),
         null,
         null,
         new GuzzleClient($guzzle)
@@ -37,7 +37,11 @@ class TwilioOTPService
 
         Cache::put("login_otp_{$phone}", $otp, now()->addMinutes(5));
 
-        $this->sendSMS($phone, "Your Nilbox login OTP is: {$otp}. Valid for 5 minutes.");
+        // FOR TRIAL ACCOUNT: Use predefined template
+        $this->sendSMS($phone, "sms_appointment_reminders");
+
+        // FOR PAID ACCOUNT: Uncomment the line below and comment the line above
+        // $this->sendSMS($phone, "Your Nilbox login OTP is: {$otp}. Valid for 5 minutes.");
 
         return $otp;
     }
@@ -49,7 +53,11 @@ class TwilioOTPService
      */
     public function sendForgotPasswordOTP(string $phone, int $otp): void
     {
-        $this->sendSMS($phone, "Your Nilbox OTP is: {$otp}. Valid for 5 minutes.");
+        // FOR TRIAL ACCOUNT: Use predefined template
+        $this->sendSMS($phone, "sms_appointment_reminders");
+
+        // FOR PAID ACCOUNT: Uncomment the line below and comment the line above
+        // $this->sendSMS($phone, "Your Nilbox OTP is: {$otp}. Valid for 5 minutes.");
     }
 
     /**
@@ -88,6 +96,11 @@ class TwilioOTPService
 
     private function sendSMS(string $phone, string $body): void
     {
+        if (empty(config('twilio.sid')) || empty(config('twilio.token'))) {
+            \Illuminate\Support\Facades\Log::warning("Twilio credentials missing. Skipping SMS to {$phone}");
+            return;
+        }
+
         $this->twilioClient->messages->create($phone, [
             'from' => $this->fromPhone,
             'body' => $body,
