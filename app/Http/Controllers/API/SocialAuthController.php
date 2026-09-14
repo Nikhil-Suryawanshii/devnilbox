@@ -103,7 +103,7 @@ class SocialAuthController extends Controller
 
     private function googleTokenExchange($code, $socialAuth)
     {
-        $client = new \Google_Client;
+        $client = new \Google\Client();
         $client->setClientId($socialAuth->client_id);
         $client->setClientSecret($socialAuth->client_secret);
         $client->setRedirectUri('postmessage');
@@ -117,7 +117,7 @@ class SocialAuthController extends Controller
 
         // Retrieve user information with the access token
         $client->setAccessToken($token['access_token']);
-        $oauth2 = new \Google_Service_Oauth2($client);
+        $oauth2 = new \Google\Service\Oauth2($client);
         $userInfo = $oauth2->userinfo->get();
 
         $data = [
