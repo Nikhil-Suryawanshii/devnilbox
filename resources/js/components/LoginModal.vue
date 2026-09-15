@@ -338,6 +338,17 @@ const initializeFB = () => {
  * @private
  */
 const loginWithFacebook = () => {
+    // Re-initialize to ensure we use the latest App ID from the API 
+    // rather than a potentially cached or empty state from onMounted
+    if (window.FB && master.socialAuths?.facebook?.client_id) {
+        FB.init({
+            appId: master.socialAuths.facebook.client_id,
+            autoLogAppEvents: true,
+            xfbml: true,
+            version: 'v20.0',
+        });
+    }
+
     FB.login((response) => {
         if (response.authResponse) {
             FB.api('/me', { fields: 'name,email' }, (userInfo) => {

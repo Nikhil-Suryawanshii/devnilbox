@@ -138,7 +138,41 @@ class SocialAuthController extends Controller
         ]);
     }
 
-    private function facebookTokenExchange($code, $socialAuth) {}
+    private function facebookTokenExchange($code, $socialAuth)
+    {
+        try {
+            // Verify the access token via Facebook Graph API
+            $response = \Illuminate\Support\Facades\Http::get('https://graph.facebook.com/me', [
+                'fields' => 'id,name,email,picture.type(large)',
+                'access_token' => $code,
+            ]);
+
+            if ($response->failed()) {
+                return $this->json('Invalid Facebook token', [], Response::HTTP_BAD_REQUEST);
+            }
+
+            $userInfo = $response->json();
+
+            $data = [
+                'name' => $userInfo['name'] ?? 'Facebook User',
+                'email' => $userInfo['email'] ?? null,
+                'phone' => null,
+                'provider' => 'facebook',
+                'id' => $userInfo['id'],
+                'profile_url' => $userInfo['picture']['data']['url'] ?? null,
+                'gender' => null,
+            ];
+
+            $user = UserRepository::socialAuthCheckOrCreate($data, 'facebook');
+
+            return $this->json('Login successfully', [
+                'user' => new UserResource($user),
+                'access' => UserRepository::getAccessToken($user),
+            ]);
+        } catch (\Exception $e) {
+            return $this->json('Facebook login failed: ' . $e->getMessage(), [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
     private function appleAccessControl($request, $socialAuth)
     {
@@ -152,7 +186,7 @@ class SocialAuthController extends Controller
             'gender' => null,
         ];
 
-        $user = UserRepository::socialAuthCheckOrCreate($data, 'google');
+        $user = UserRepository::socialAuthCheckOrCreate($data, 'apple');
 
         return $this->json('Login successfully', [
             'user' => new UserResource($user),
