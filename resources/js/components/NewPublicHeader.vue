@@ -293,11 +293,10 @@ const login = async () => {
 };
 
 const showMyCart = () => {
-    master.basketCanvas = true
     if (authStore.token === null) {
-        return authStore.loginModal = true;
+        return (authStore.loginModal = true);
     }
-    router.push('/wishlist')
+    master.basketCanvas = true;
 }
 
 const showWishlist = () => {

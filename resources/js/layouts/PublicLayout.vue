@@ -77,6 +77,7 @@
         <PublicFooter />
 
         <LoginModal />
+        <BasketCard />
         <MobileBottomNav />
 
     </div>
@@ -91,6 +92,7 @@ import MobileBottomNav from '../components/MobileBottomNav.vue';
 //import PublicHeader from '../components/NewPublicHeader.vue';
 import PublicFooter from '../components/NewPublicFooter.vue';
 import LoginModal from '../components/LoginModal.vue';
+import BasketCard from '../components/BasketCard.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { useMaster } from '../stores/MasterStore';

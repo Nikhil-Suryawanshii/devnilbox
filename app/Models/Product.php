@@ -145,7 +145,27 @@ class Product extends Model
      */
     public function medias(): BelongsToMany
     {
-        return $this->belongsToMany(Media::class, 'product_thumbnails');
+        return $this->belongsToMany(Media::class, 'product_thumbnails')->withPivot('color_id');
+    }
+
+    public function boxItems(): HasMany
+    {
+        return $this->hasMany(ProductBoxItem::class)->orderBy('sort_order');
+    }
+
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(ProductFaq::class)->orderBy('sort_order');
+    }
+
+    public function specifications(): HasMany
+    {
+        return $this->hasMany(ProductSpecification::class)->orderBy('sort_order');
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(ProductFeature::class)->orderBy('sort_order');
     }
 
     public function attachments(): BelongsToMany
@@ -172,6 +192,7 @@ class Product extends Model
                     'thumbnail' => null,
                     'url' => Storage::disk('public')->url($this->videoMedia->src),
                     'type' => $this->videoMedia->type,
+                    'color_id' => null,
                 ];
             } elseif ($this->videoMedia && $this->videoMedia->type != 'file' && $this->videoMedia->src != null) {
                 $thumbnails[] = (object) [
@@ -179,6 +200,7 @@ class Product extends Model
                     'thumbnail' => null,
                     'url' => $this->videoMedia->src,
                     'type' => $this->videoMedia->type,
+                    'color_id' => null,
                 ];
             }
 
@@ -187,6 +209,7 @@ class Product extends Model
                 'thumbnail' => $this->thumbnail,
                 'url' => null,
                 'type' => 'image',
+                'color_id' => null,
             ];
         }
 
@@ -200,6 +223,7 @@ class Product extends Model
                 'thumbnail' => $thumbnail,
                 'url' => null,
                 'type' => 'image',
+                'color_id' => $media->pivot->color_id ?? null,
             ];
         }
 

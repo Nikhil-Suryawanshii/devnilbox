@@ -82,6 +82,7 @@ class ShopRepository extends Repository
             'opening_time' => $request->opening_time ?? $shop->opening_time,
             'closing_time' => $request->closing_time ?? $shop->closing_time,
             'estimated_delivery_time' => $request->estimated_delivery_time ?? $shop->estimated_delivery_time,
+            'support_note' => $request->support_note ?? $shop->support_note,
         ]);
 
         return $shop;

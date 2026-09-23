@@ -26,7 +26,12 @@ class ProductDetailsResource extends JsonResource
             'brand',
             'flashSales',
             'categories',
-            'recentViews'
+            'recentViews',
+            'boxItems',
+            'faqs',
+            'specifications',
+            'features',
+            'medias',
         ]);
 
         $lang = request()->header('accept-language') ?? 'en';
@@ -100,12 +105,40 @@ class ProductDetailsResource extends JsonResource
                 'rating' => (float) round($shop?->averageRating, 1),
                 'estimated_delivery_time' => (string) ($shop?->estimated_delivery_time ?? '2-4 days'),
                 'delivery_charge' => (float) getDeliveryCharge(1),
-                'last_online' => $lastOnline
+                'last_online' => $lastOnline,
+                'support_note' => $shop?->support_note,
             ],
             'flash_sale' => $flashSaleProduct ? FlashSaleResource::make($flashSale) : null,
             'meta_title' => $this->meta_title ?? $name,
             'meta_description' => $this->meta_description ?? $name,
             'meta_keywords' => $this->meta_keywords,
+            'warranty_label' => $this->warranty_label,
+            'warranty_note' => $this->warranty_note,
+            'return_days' => $this->return_days,
+            'return_note' => $this->return_note,
+            'box_items' => $this->boxItems->map(fn ($item) => [
+                'id' => $item->id,
+                'item_name' => $item->item_name,
+                'sort_order' => $item->sort_order,
+            ])->values(),
+            'features' => $this->features->map(fn ($item) => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'icon' => $item->icon,
+                'sort_order' => $item->sort_order,
+            ])->values(),
+            'specifications' => $this->specifications->map(fn ($item) => [
+                'id' => $item->id,
+                'label' => $item->label,
+                'value' => $item->value,
+                'sort_order' => $item->sort_order,
+            ])->values(),
+            'faqs' => $this->faqs->where('is_published', true)->values()->map(fn ($item) => [
+                'id' => $item->id,
+                'question' => $item->question,
+                'answer' => $item->answer,
+                'sort_order' => $item->sort_order,
+            ])->values(),
             'view_count' => $this->recentViews->count(),
             'condition' => $daysSinceCreated < 5 ? 'new' : 'old',
             'categories' => $this->categories->map(function ($category) {

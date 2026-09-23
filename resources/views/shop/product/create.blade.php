@@ -405,6 +405,63 @@
                     </div>
                 </div>
 
+                <!--######## PDP extras (Phase B) ##########-->
+                <div class="card mt-4 mb-3">
+                    <div class="card-body">
+                        <div class="d-flex gap-2 border-bottom pb-2">
+                            <i class="fa-solid fa-list-check"></i>
+                            <h5>{{ __('Product page details') }}</h5>
+                        </div>
+                        <p class="text-muted small mt-2 mb-3">
+                            {{ __('Fill these fields → they show on customer product details (Overview / Details / Q&A).') }}
+                        </p>
+                        <div class="row">
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">{{ __('Warranty label') }}</label>
+                                <input type="text" name="warranty_label" class="form-control"
+                                    value="{{ old('warranty_label') }}" placeholder="1 Year Warranty">
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">{{ __('Warranty note') }}</label>
+                                <input type="text" name="warranty_note" class="form-control"
+                                    value="{{ old('warranty_note') }}" placeholder="Official Brand">
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">{{ __('Return days') }}</label>
+                                <input type="number" name="return_days" class="form-control" min="0"
+                                    value="{{ old('return_days') }}" placeholder="7">
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">{{ __('Return note') }}</label>
+                                <input type="text" name="return_note" class="form-control"
+                                    value="{{ old('return_note') }}" placeholder="Easy Returns">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ __('Key Features') }}</label>
+                            <textarea name="features_text" class="form-control" rows="3"
+                                placeholder="{{ __('One feature per line') }}">{{ old('features_text') }}</textarea>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ __("What's in the Box") }}</label>
+                            <textarea name="box_items_text" class="form-control" rows="3"
+                                placeholder="{{ __('One item per line') }}">{{ old('box_items_text') }}</textarea>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ __('Specifications') }}</label>
+                            <textarea name="specifications_text" class="form-control" rows="3"
+                                placeholder="Battery: 48 hours&#10;Weight: 45g">{{ old('specifications_text') }}</textarea>
+                            <small class="text-muted">{{ __('Format: Label: Value (one per line)') }}</small>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ __('Q&A / FAQs') }}</label>
+                            <textarea name="faqs_text" class="form-control" rows="3"
+                                placeholder="Is it waterproof? | Yes, IP68 rated">{{ old('faqs_text') }}</textarea>
+                            <small class="text-muted">{{ __('Format: Question | Answer (one per line)') }}</small>
+                        </div>
+                    </div>
+                </div>
+
                 <!--######## SEO section ##########-->
                 <div class="card mt-4 mb-3">
                     <div class="card-body">

@@ -114,12 +114,67 @@
                 </div>
             </div>
 
-            <h5 class="text-dark fw-bold mt-4">
-                {{ __('Description') }}
-            </h5>
-            <p>
-                {!! $product->description !!}
-            </p>
+            <h5 class="text-dark fw-bold mt-4">{{ __('Description') }}</h5>
+            <p>{!! $product->description !!}</p>
+
+            <div class="row mt-4 g-3">
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <h6 class="fw-bold">{{ __('Warranty') }}</h6>
+                        <p class="mb-0">{{ $product->warranty_label ?: __('—') }}</p>
+                        <small class="text-muted">{{ $product->warranty_note }}</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <h6 class="fw-bold">{{ __('Return') }}</h6>
+                        <p class="mb-0">
+                            {{ $product->return_days ? $product->return_days.' '.__('days') : __('—') }}
+                        </p>
+                        <small class="text-muted">{{ $product->return_note }}</small>
+                    </div>
+                </div>
+            </div>
+
+            @if ($product->features->count())
+                <h5 class="text-dark fw-bold mt-4">{{ __('Key Features') }}</h5>
+                <ul>
+                    @foreach ($product->features as $feature)
+                        <li>{{ $feature->title }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ($product->boxItems->count())
+                <h5 class="text-dark fw-bold mt-4">{{ __("What's in the Box") }}</h5>
+                <ul>
+                    @foreach ($product->boxItems as $item)
+                        <li>{{ $item->item_name }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ($product->specifications->count())
+                <h5 class="text-dark fw-bold mt-4">{{ __('Specifications') }}</h5>
+                <table class="table table-sm">
+                    @foreach ($product->specifications as $spec)
+                        <tr>
+                            <td class="text-muted">{{ $spec->label }}</td>
+                            <td class="fw-semibold">{{ $spec->value }}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            @endif
+
+            @if ($product->faqs->count())
+                <h5 class="text-dark fw-bold mt-4">{{ __('Q&A') }}</h5>
+                @foreach ($product->faqs as $faq)
+                    <div class="mb-3">
+                        <div class="fw-semibold">{{ $faq->question }}</div>
+                        <div class="text-muted">{{ $faq->answer }}</div>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </div>
 

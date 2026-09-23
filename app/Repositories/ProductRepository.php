@@ -111,6 +111,10 @@ class ProductRepository extends Repository
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'meta_keywords' => $keywords ? Str::limit($keywords, 200, '') : null,
+            'warranty_label' => $request->warranty_label,
+            'warranty_note' => $request->warranty_note,
+            'return_days' => $request->return_days,
+            'return_note' => $request->return_note,
         ]);
 
         foreach ($request->names ?? [] as $key => $value) {
@@ -173,6 +177,8 @@ class ProductRepository extends Repository
             }
         }
 
+        self::syncPdpExtras($product, $request);
+
         return $product;
     }
 
@@ -234,6 +240,10 @@ class ProductRepository extends Repository
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'meta_keywords' => $keywords ? Str::limit($keywords, 200, '') : null,
+            'warranty_label' => $request->warranty_label,
+            'warranty_note' => $request->warranty_note,
+            'return_days' => $request->return_days,
+            'return_note' => $request->return_note,
         ]);
 
         foreach ($request->names ?? [] as $key => $value) {
@@ -321,7 +331,72 @@ class ProductRepository extends Repository
             }
         }
 
+        self::syncPdpExtras($product, $request);
+
         return $product;
+    }
+
+    /**
+     * Sync Phase B PDP extras: box items, faqs, specs, features.
+     */
+    private static function syncPdpExtras(Product $product, ProductRequest $request): void
+    {
+        $product->boxItems()->delete();
+        foreach (self::linesToArray($request->box_items_text) as $i => $line) {
+            $product->boxItems()->create([
+                'item_name' => $line,
+                'sort_order' => $i,
+            ]);
+        }
+
+        $product->features()->delete();
+        foreach (self::linesToArray($request->features_text) as $i => $line) {
+            $product->features()->create([
+                'title' => $line,
+                'icon' => null,
+                'sort_order' => $i,
+            ]);
+        }
+
+        $product->specifications()->delete();
+        foreach (self::linesToArray($request->specifications_text) as $i => $line) {
+            [$label, $value] = array_pad(explode(':', $line, 2), 2, null);
+            $label = trim((string) $label);
+            $value = trim((string) $value);
+            if ($label === '' || $value === '') {
+                continue;
+            }
+            $product->specifications()->create([
+                'label' => $label,
+                'value' => $value,
+                'sort_order' => $i,
+            ]);
+        }
+
+        $product->faqs()->delete();
+        foreach (self::linesToArray($request->faqs_text) as $i => $line) {
+            [$question, $answer] = array_pad(explode('|', $line, 2), 2, null);
+            $question = trim((string) $question);
+            $answer = trim((string) $answer);
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+            $product->faqs()->create([
+                'question' => $question,
+                'answer' => $answer,
+                'is_published' => true,
+                'sort_order' => $i,
+            ]);
+        }
+    }
+
+    private static function linesToArray(?string $text): array
+    {
+        if (! $text) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $text)), fn ($l) => $l !== ''));
     }
 
     private static function videoCreateOrUpdate($request, $product = null): ?Media

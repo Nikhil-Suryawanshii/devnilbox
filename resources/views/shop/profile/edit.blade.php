@@ -138,6 +138,12 @@
                                 :value="$shop->estimated_delivery_time" required="true" />
                         </div>
 
+                        <div class="mt-3">
+                            <x-input type="text" name="support_note" label="Support note (product page)"
+                                :value="$shop->support_note" placeholder="We're here" />
+                            <small class="text-muted">{{ __('Shown on customer product details (24/7 Support).') }}</small>
+                        </div>
+
                     </div>
 
                     <div class="col-lg-4 mt-3">

@@ -39,3 +39,6 @@ Ready eCommerce-Admin with Customer Website/
 /public/storage
 *.zip
 mdFiles/
+mdFiles/flow/
+mdFiles/pdp-web/
+mdFiles/steps/
