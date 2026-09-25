@@ -13,7 +13,7 @@
 
                     <!-- Step 02: Gallery -->
                     <div class="lg:col-span-7 xl:col-span-8">
-                        <div class="group relative aspect-square rounded-3xl overflow-hidden bg-slate-50">
+                        <div class="group relative product-main-image-box w-full h-[420px] sm:h-[520px] md:h-[650px] lg:h-[660px] max-h-[680px] rounded-3xl overflow-hidden bg-slate-50 p-4 sm:p-5 md:p-6 flex items-center justify-center">
                             <swiper
                                 v-if="galleryThumbs.length"
                                 :key="`main-${product.id}`"
@@ -35,7 +35,7 @@
                                         <img
                                             v-if="thumb.thumbnail"
                                             :src="thumb.thumbnail"
-                                            class="w-full h-full object-contain"
+                                            class="product-main-image max-w-full max-h-full w-auto h-auto object-contain"
                                             :alt="product.name"
                                         />
                                         <div
@@ -1159,9 +1159,32 @@ onUnmounted(() => clearInterval(countdownInterval));
 }
 .product-main-swiper :deep(.swiper-slide) {
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .product-main-swiper :deep(.swiper-button-next),
 .product-main-swiper :deep(.swiper-button-prev) {
     color: #f97316;
+}
+.product-main-image {
+    max-width: min(100%, 620px);
+    max-height: min(100%, 650px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+}
+@media (max-width: 767px) {
+    .product-main-image {
+        max-width: min(100%, 100%);
+        max-height: min(100%, 380px);
+    }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+    .product-main-image {
+        max-width: min(100%, 560px);
+        max-height: min(100%, 500px);
+    }
 }
 </style>
