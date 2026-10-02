@@ -139,6 +139,13 @@ class ProductDetailsResource extends JsonResource
                 'answer' => $item->answer,
                 'sort_order' => $item->sort_order,
             ])->values(),
+            'reviews_list' => $this->reviews->map(fn ($review) => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'description' => $review->description,
+                'customer_name' => $review->customer?->user?->name ?? 'Anonymous',
+                'created_at' => $review->created_at?->diffForHumans(),
+            ])->values(),
             'view_count' => $this->recentViews->count(),
             'condition' => $daysSinceCreated < 5 ? 'new' : 'old',
             'categories' => $this->categories->map(function ($category) {
