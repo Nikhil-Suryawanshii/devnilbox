@@ -230,18 +230,16 @@
                 </p>
 
                 <!-- Social -->
-                <div class="flex items-center gap-3">
-                   <div v-for="(footer, index) in master.footers" :key="footer.id">
-                        <div v-for="item in footer.items" :key="item.id">
-                            <div v-if="item.type == 'social_links'" class="flex justify-start pt-6 items-center gap-6">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <a v-for="socialLink in master.socialLinks" :key="socialLink.name" target="_blank"
-                                        :href="socialLink.link" class="w-[30px] h-[30px] overflow-hidden" :title="socialLink.name">
-                                        <img :src="socialLink.logo" alt="" class="w-full h-full object-cover">
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                <div class="flex w-full md:w-auto items-center justify-center md:justify-end gap-3">
+                    <!-- Rendered once (not per footer section) so icons always stay in one row -->
+                    <div
+                        v-if="hasSocialLinks"
+                        class="flex flex-row flex-wrap items-center justify-center md:justify-end gap-2 sm:gap-3 w-full"
+                    >
+                        <a v-for="socialLink in master.socialLinks" :key="socialLink.name" target="_blank" rel="noopener"
+                            :href="socialLink.link" class="w-7 h-7 sm:w-[34px] sm:h-[34px] shrink-0 rounded-full overflow-hidden hover:scale-110 transition-transform" :title="socialLink.name">
+                            <img :src="socialLink.logo" :alt="socialLink.name" class="w-full h-full object-cover">
+                        </a>
                     </div>
 
                     <!-- <a
@@ -309,6 +307,14 @@ const openAppStore = () => {
         window.open(master.appStoreLink, '_blank');
     }
 };
+
+// Show the social icons once if any footer section has a "social_links" item
+const hasSocialLinks = computed(() => {
+    const enabled = (master.footers || []).some((footer) =>
+        (footer.items || []).some((item) => item.type === 'social_links')
+    );
+    return enabled && (master.socialLinks || []).length > 0;
+});
 
 const footerContact = computed(() => {
     let phone = master.mobile;

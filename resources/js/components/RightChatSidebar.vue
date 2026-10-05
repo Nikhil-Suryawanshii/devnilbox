@@ -1,6 +1,6 @@
 <template>
     <transition name="slide-sidebar">
-        <div class="fixed transition-all h-[70vh] w-3/4 md:w-2/4 lg:w-1/4 right-0 ease-in-out duration-500 bg-white rounded-tl-2xl shadow-lg flex flex-col overflow-hidden z-[5]"
+        <div class="fixed transition-all h-[70vh] w-3/4 md:w-2/4 lg:w-1/4 right-0 ease-in-out duration-500 bg-white rounded-tl-2xl shadow-2xl flex flex-col overflow-hidden z-[100]"
             :class="show ? 'bottom-0' : '-bottom-full'">
             <!-- Header -->
             <div class="bg-gray-900 text-white px-4 py-3 flex items-center justify-between cursor-pointer">
@@ -8,8 +8,9 @@
                     <img :src="props.shop?.logo ?? props.shop?.shop_logo" alt="Logo" class="w-8 h-8 rounded-full" />
                     <div>
                         <p class="font-semibold">{{ props.shop?.name ?? props.shop?.shop_name }}</p>
-                        <p class="text-sm" :class="{ 'text-green-400': shopOnline, 'text-red-400': !shopOnline }">
-                            {{ shopOnline ? 'Online' : 'Offline' }}</p>
+                        <p class="text-sm" :class="{ 'text-green-400': (props.shop?.shop_status === 'Online' || shopOnline), 'text-red-400': !(props.shop?.shop_status === 'Online' || shopOnline) }">
+                            {{ (props.shop?.shop_status === 'Online' || shopOnline) ? 'Online' : 'Offline' }}
+                        </p>
                     </div>
                 </div>
                 <button @click="handleClose" class="text-white text-xl">

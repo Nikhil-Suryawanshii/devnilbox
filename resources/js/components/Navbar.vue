@@ -1,11 +1,13 @@
 <template>
-    <div 
-      class="sticky top-0 z-20 transition-colors duration-300 ease-in-out"
-        :class="scrolled ? 'bg-white shadow-sm text-slate-500' : 'bg-transparent text-white'"
+    <header 
+        class="sticky top-0 z-50 w-full transition-all duration-300 ease-in-out backdrop-blur-xl border-b"
+        :class="scrolled 
+            ? 'bg-white/90 shadow-sm border-slate-200/50' 
+            : 'bg-white/40 border-white/20'"
     >
         <NavbarMiddle />
-        <NavbarBottom />
-    </div>
+        <NavbarBottom class="transition-all duration-300" :class="scrolled ? 'hidden md:block' : ''" />
+    </header>
 </template>
 
 <script setup>

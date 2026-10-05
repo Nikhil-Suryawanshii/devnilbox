@@ -7,6 +7,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ShopDetailsResource;
 use App\Http\Resources\ShopResource;
+use App\Models\Category;
 use App\Models\Shop;
 use App\Repositories\ProductRepository;
 use App\Repositories\ShopRepository;
@@ -80,6 +81,24 @@ class ShopController extends Controller
         $skip = ($page * $perPage) - $perPage;
 
         $shop = ShopRepository::find($request->shop_id);
+
+        // Optional mode: only categories that actually contain this shop's
+        // active products (used by the storefront shop page filter pills).
+        if ($request->boolean('with_products')) {
+            $categories = Category::active()
+                ->whereHas('products', function ($query) use ($shop) {
+                    $query->where('products.shop_id', $shop->id)->isActive();
+                })
+                ->with('media')
+                ->orderBy('display_order')
+                ->orderBy('id')
+                ->get();
+
+            return $this->json('Shop categories', [
+                'total' => $categories->count(),
+                'categories' => CategoryResource::collection($categories),
+            ]);
+        }
 
         $categories = $shop->categories()->active()->where(function ($query) use ($perPage, $page, $skip) {
             $query->when($perPage && $page, function ($query) use ($perPage, $skip) {
