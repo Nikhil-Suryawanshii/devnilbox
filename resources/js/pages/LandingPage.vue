@@ -535,15 +535,26 @@
                     </span>
                 </div>
 
-                <div class="mb-10 -mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+                <div class="mb-10 -mx-1 overflow-x-auto px-1 pb-2">
+                    <div class="landing-cat-track flex w-max gap-2" :ref="setLandingCatTrack">
                     <button type="button"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:px-5"
-                        :class="categoryId === null ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                        @click="setCategory(null)">All</button>
+                        class="landing-cat-pill inline-flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-3 pr-4 text-sm font-semibold transition sm:pr-5"
+                        :class="categoryId === null ? 'is-active bg-orange-500 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        @click="setCategory(null)">
+                        <span class="text-base leading-none" aria-hidden="true">🏷️</span>
+                        All
+                    </button>
                     <button v-for="c in categories" :key="c.id" type="button"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:px-5"
-                        :class="categoryId === c.id ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                        @click="setCategory(c.id)">{{ c.name }}</button>
+                        class="landing-cat-pill inline-flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 text-sm font-semibold transition sm:pr-5"
+                        :class="categoryId === c.id ? 'is-active bg-orange-500 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        @click="setCategory(c.id)">
+                        <img v-if="c.thumbnail" :src="c.thumbnail" :alt="c.name"
+                            class="h-7 w-7 shrink-0 rounded-full bg-white object-cover" loading="lazy" />
+                        <span v-else
+                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">{{ (c.name || '?').charAt(0).toUpperCase() }}</span>
+                        {{ c.name }}
+                    </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
@@ -703,6 +714,52 @@ const openAppStore = () => {
 
 const categories = ref([]);
 const categoryId = ref(null);
+
+// One shared snake line across every category pill. The animated value lives on the
+// track and is inherited; each pill only stores its own x offset. New pills are
+// picked up by the observers, so a category added later joins the same flow.
+let landingCatTrackEl = null;
+let landingCatMutationObserver = null;
+let landingCatResizeObserver = null;
+
+const syncLandingCatSnake = () => {
+    if (!landingCatTrackEl) return;
+    const pills = landingCatTrackEl.querySelectorAll('.landing-cat-pill');
+    pills.forEach((pill) => pill.style.setProperty('--landing-pill-x', `${pill.offsetLeft}px`));
+    const last = pills[pills.length - 1];
+    const trackWidth = last ? last.offsetLeft + last.offsetWidth : 0;
+    landingCatTrackEl.style.setProperty('--landing-track-w', `${trackWidth}px`);
+    landingCatTrackEl.style.setProperty('--landing-snake-dur', `${Math.min(9, Math.max(2.5, (trackWidth + 280) / 200)).toFixed(2)}s`);
+};
+
+const observeLandingCatPills = () => {
+    if (!landingCatResizeObserver || !landingCatTrackEl) return;
+    landingCatResizeObserver.disconnect();
+    landingCatResizeObserver.observe(landingCatTrackEl);
+    landingCatTrackEl.querySelectorAll('.landing-cat-pill').forEach((pill) => landingCatResizeObserver.observe(pill));
+};
+
+const teardownLandingCatSnake = () => {
+    landingCatMutationObserver?.disconnect();
+    landingCatResizeObserver?.disconnect();
+    landingCatMutationObserver = null;
+    landingCatResizeObserver = null;
+};
+
+const setLandingCatTrack = (el) => {
+    if (el === landingCatTrackEl) return;
+    teardownLandingCatSnake();
+    landingCatTrackEl = el;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    landingCatResizeObserver = new ResizeObserver(syncLandingCatSnake);
+    landingCatMutationObserver = new MutationObserver(() => {
+        observeLandingCatPills();
+        syncLandingCatSnake();
+    });
+    landingCatMutationObserver.observe(el, { childList: true });
+    observeLandingCatPills();
+    syncLandingCatSnake();
+};
 const searchInput = ref('');
 const searchApplied = ref('');
 const products = ref([]);
@@ -883,9 +940,62 @@ onMounted(async () => {
 onUnmounted(() => {
     clearTimeout(searchTimer);
     io?.disconnect();
+    teardownLandingCatSnake();
 });
 
 const showProductDetails = (product) => {
     router.push({ name: 'productDetails', params: { id: product.id } });
 }
 </script>
+
+<style scoped>
+/* One line for the whole row. --landing-snake-x is animated once on the track
+   and inherited by every pill; each pill clips it to its own border using --landing-pill-x. */
+@property --landing-snake-x {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: -140px;
+}
+
+.landing-cat-track {
+    --landing-tail: 140px;
+    position: relative;
+    animation: landing-cat-snake var(--landing-snake-dur, 3s) linear infinite;
+}
+
+.landing-cat-pill {
+    position: relative;
+}
+
+.landing-cat-pill:not(.is-active)::after {
+    --h: calc(var(--landing-snake-x) - var(--landing-pill-x, 0px));
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    border-radius: 999px;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 107, 0, 0) calc(var(--h) - var(--landing-tail)),
+        rgba(255, 107, 0, 0.28) calc(var(--h) - 60px),
+        rgba(255, 107, 0, 0.8) calc(var(--h) - 8px),
+        #FF8A33 var(--h),
+        rgba(255, 138, 51, 0) calc(var(--h) + 8px)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+@keyframes landing-cat-snake {
+    from { --landing-snake-x: -140px; }
+    to { --landing-snake-x: calc(var(--landing-track-w, 600px) + 140px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-cat-track {
+        animation: none;
+    }
+}
+</style>

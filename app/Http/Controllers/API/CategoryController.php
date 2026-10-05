@@ -45,7 +45,7 @@ class CategoryController extends Controller
             return $query->skip($skip)->take($perPage);
         })->when($forLanding, function ($query) {
             return $query;
-        })->with('subCategories')->get();
+        })->with(['subCategories', 'media'])->get();
 
         return $this->json('categories', [
             'total' => $total,
