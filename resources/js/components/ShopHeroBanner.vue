@@ -36,7 +36,7 @@
                                 <span class="status-text">{{ shop?.shop_status }}</span>
                             </div>
                             <span class="hero-divider">|</span>
-                            <span class="hero-items-count">{{ shop?.total_products }}+ {{ $t('Items') }}</span>
+                            <span class="hero-items-count">{{ animProducts }}+ {{ $t('Items') }}</span>
                         </div>
 
                         <div class="hero-meta-row">
@@ -44,13 +44,13 @@
                                 <svg class="hero-star-icon" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
-                                <span class="hero-rating-value">{{ Number(shop?.rating || 0).toFixed(1) }}</span>
+                                <span class="hero-rating-value">{{ animRating }}</span>
                                 <span class="hero-rating-count">({{ shop?.total_reviews }})</span>
                             </div>
                             <span class="hero-divider">|</span>
                             <div class="hero-positive-reviews">
                                 <span class="positive-icon">👍</span>
-                                <span class="positive-text">{{ positiveReviewPercent }}% {{ $t('Positive Reviews') }}</span>
+                                <span class="positive-text">{{ animPositive }}% {{ $t('Positive Reviews') }}</span>
                             </div>
                         </div>
 
@@ -95,7 +95,7 @@
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                     </div>
-                    <div class="rating-badge-value">{{ Number(shop?.rating || 0).toFixed(1) }}</div>
+                    <div class="rating-badge-value">{{ animRating }}</div>
                     <div class="rating-badge-reviews">{{ shop?.total_reviews }} {{ $t('Reviews') }}</div>
 
                     <ul class="rating-badge-list">
@@ -104,13 +104,13 @@
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
                             </svg>
-                            <span>{{ shop?.total_products }}+ {{ $t('Products') }}</span>
+                            <span>{{ animProducts }}+ {{ $t('Products') }}</span>
                         </li>
                         <li>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
                             </svg>
-                            <span>{{ positiveReviewPercent }}% {{ $t('Positive Reviews') }}</span>
+                            <span>{{ animPositive }}% {{ $t('Positive Reviews') }}</span>
                         </li>
                         <li>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -154,7 +154,7 @@
                                 <span class="status-text">{{ shop?.shop_status }}</span>
                             </div>
                             <span class="hero-divider">|</span>
-                            <span class="hero-items-count">{{ shop?.total_products }}+ {{ $t('Items') }}</span>
+                            <span class="hero-items-count">{{ animProducts }}+ {{ $t('Items') }}</span>
                         </div>
 
                         <div class="hero-meta-row mobile-meta-row">
@@ -162,12 +162,12 @@
                                 <svg class="hero-star-icon" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
-                                <span class="hero-rating-value">{{ Number(shop?.rating || 0).toFixed(1) }}</span>
+                                <span class="hero-rating-value">{{ animRating }}</span>
                                 <span class="hero-rating-count">({{ shop?.total_reviews }})</span>
                             </div>
                             <div class="hero-positive-reviews mobile-positive">
                                 <span class="positive-icon">👍</span>
-                                <span class="positive-text">{{ positiveReviewPercent }}% {{ $t('Positive Reviews') }}</span>
+                                <span class="positive-text">{{ animPositive }}% {{ $t('Positive Reviews') }}</span>
                             </div>
                         </div>
 
@@ -183,7 +183,7 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <div class="rating-badge-value">{{ Number(shop?.rating || 0).toFixed(1) }}</div>
+                        <div class="rating-badge-value">{{ animRating }}</div>
                         <div class="rating-badge-reviews">{{ shop?.total_reviews }} {{ $t('Reviews') }}</div>
 
                         <ul class="rating-badge-list">
@@ -192,13 +192,13 @@
                                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
                                 </svg>
-                                <span>{{ shop?.total_products }}+ {{ $t('Products') }}</span>
+                                <span>{{ animProducts }}+ {{ $t('Products') }}</span>
                             </li>
                             <li>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
                                 </svg>
-                                <span>{{ positiveReviewPercent }}% {{ $t('Reviews') }}</span>
+                                <span>{{ animPositive }}% {{ $t('Reviews') }}</span>
                             </li>
                             <li>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -261,7 +261,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import SkeletonLoader from './SkeletonLoader.vue';
 
 const props = defineProps({
@@ -283,6 +283,51 @@ const positiveReviewPercent = computed(() => {
 });
 
 const isFollowing = computed(() => !!props.shop?.is_following);
+
+// ---- Count-up numbers (rating, products, positive %) ----
+const prefersReducedMotion = () =>
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+const rafIds = new Set();
+
+const useCountUp = (getTarget, format, duration = 1100) => {
+    const value = ref(0);
+    const run = (target) => {
+        const to = Number(target) || 0;
+        if (prefersReducedMotion() || typeof requestAnimationFrame === 'undefined') {
+            value.value = to;
+            return;
+        }
+        const from = 0;
+        const start = performance.now();
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+            value.value = from + (to - from) * eased;
+            if (t < 1) {
+                rafIds.add(requestAnimationFrame(step));
+            } else {
+                value.value = to;
+            }
+        };
+        rafIds.add(requestAnimationFrame(step));
+    };
+    // Re-run only when the underlying number changes (not when e.g. is_following toggles)
+    watch(
+        () => (props.isLoading ? null : getTarget()),
+        (target) => {
+            if (target !== null) run(target);
+        },
+        { immediate: true }
+    );
+    return computed(() => format(value.value));
+};
+
+const animRating = useCountUp(() => props.shop?.rating || 0, (v) => v.toFixed(1));
+const animProducts = useCountUp(() => props.shop?.total_products || 0, (v) => Math.round(v));
+const animPositive = useCountUp(() => positiveReviewPercent.value, (v) => Math.round(v));
+
+onBeforeUnmount(() => rafIds.forEach((id) => cancelAnimationFrame(id)));
 </script>
 
 <style scoped>
@@ -790,6 +835,94 @@ const isFollowing = computed(() => !!props.shop?.is_following);
     font-size: 0.78rem;
     gap: 5px;
     min-width: 0;
+}
+
+/* ---- MOTION ---- */
+.hero-rating-value,
+.rating-badge-value,
+.hero-items-count,
+.positive-text,
+.rating-badge-list li span {
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes heroIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.99); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes heroCoverZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); }
+}
+
+@keyframes heroStarPop {
+    0% { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+    70% { opacity: 1; transform: scale(1.2) rotate(0); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes heroLogoGlow {
+    0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(255, 107, 0, 0); }
+    50% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 7px rgba(255, 107, 0, 0.14); }
+}
+
+.shop-hero-banner {
+    animation: heroIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Slow Ken Burns zoom on the cover */
+.hero-cover-image img,
+.mobile-hero-cover img {
+    transform-origin: center;
+    will-change: transform;
+    animation: heroCoverZoom 14s ease-in-out infinite alternate;
+}
+
+/* Stars pop in one after another */
+.rating-badge-star {
+    animation: heroStarPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.rating-badge-star:nth-child(1) { animation-delay: 0.35s; }
+.rating-badge-star:nth-child(2) { animation-delay: 0.45s; }
+.rating-badge-star:nth-child(3) { animation-delay: 0.55s; }
+.rating-badge-star:nth-child(4) { animation-delay: 0.65s; }
+.rating-badge-star:nth-child(5) { animation-delay: 0.75s; }
+
+/* Soft pulse ring on the logo */
+.hero-profile-image {
+    animation: heroLogoGlow 3.6s ease-in-out 1s infinite;
+}
+
+/* Sheen sweep on the primary button */
+.hero-btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+.hero-btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -70%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+.hero-btn-primary:hover::after {
+    left: 130%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shop-hero-banner,
+    .hero-cover-image img,
+    .mobile-hero-cover img,
+    .rating-badge-star,
+    .hero-profile-image {
+        animation: none;
+    }
 }
 
 /* ---- SKELETON LOADING ---- */

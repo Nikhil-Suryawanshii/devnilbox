@@ -14,12 +14,13 @@
             :shop="activeChatShop" />
 
         <!-- ===== SHOP NAVIGATION TABS ===== -->
-        <div class="shop-tabs-wrapper main-container">
+        <div class="shop-tabs-wrapper main-container shop-reveal" style="--d: 0.12s">
             <div class="shop-tabs-container">
                 <div class="shop-tabs-scroll">
                     <button
                         v-for="tab in tabs"
                         :key="tab.key"
+                        :ref="(el) => setTabEl(tab.key, el)"
                         class="shop-tab"
                         :class="{ 'shop-tab-active': activeTab === tab.key }"
                         @click="switchTab(tab.key)"
@@ -28,6 +29,12 @@
                         <span class="tab-label-short">{{ $t(tab.shortLabel || tab.label) }}</span>
                         <span v-if="tab.count !== null" class="shop-tab-count">({{ tab.count }})</span>
                     </button>
+                    <!-- Single underline that slides between tabs -->
+                    <span
+                        class="shop-tab-indicator"
+                        :class="{ 'is-ready': tabIndicator.ready }"
+                        :style="{ transform: `translateX(${tabIndicator.x}px)`, width: `${tabIndicator.w}px` }"
+                    ></span>
                 </div>
             </div>
         </div>
@@ -38,6 +45,8 @@
             <!-- ===== PRODUCTS TAB ===== -->
             <template v-if="activeTab === 'products'">
 
+                <!-- Sticky toolbar: search + sort + view + categories -->
+                <div class="shop-toolbar shop-reveal" :class="{ 'is-stuck': isToolbarStuck }" style="--d: 0.2s" ref="toolbarEl">
                 <!-- Search + Sort + View Controls -->
                 <div class="shop-controls">
                     <div class="shop-search-box">
@@ -129,11 +138,12 @@
                         </template>
                     </div>
                 </div>
+                </div>
 
                 <!-- Product Header -->
-                <div class="shop-product-header">
+                <div class="shop-product-header shop-reveal" style="--d: 0.3s">
                     <div class="shop-product-header-left">
-                        <h2 class="shop-product-heading">{{ activeCategory === 'all' ? $t('All Products') : activeCategoryLabel }}</h2>
+                        <h2 :key="activeCategory" class="shop-product-heading shop-heading-swap">{{ activeCategory === 'all' ? $t('All Products') : activeCategoryLabel }}</h2>
                         <span class="shop-product-count">{{ totalProducts }} {{ $t('products found') }}</span>
                     </div>
                     <div class="shop-product-header-right" v-if="totalProducts > 0 && !isLoadingProducts">
@@ -146,7 +156,12 @@
                 <!-- Product Grid -->
                 <div class="shop-product-grid" :class="viewMode === 'list' ? 'list-view' : ''">
                     <template v-if="!isLoadingProducts">
-                        <div v-for="product in products" :key="product.id" class="shop-product-item">
+                        <div
+                            v-for="(product, index) in products"
+                            :key="product.id"
+                            class="shop-product-item shop-reveal"
+                            :style="{ '--d': `${0.04 + Math.min(index, 11) * 0.05}s` }"
+                        >
                             <ProductCard :product="product" />
                         </div>
                     </template>
@@ -191,7 +206,7 @@
 
             <!-- ===== REVIEWS TAB ===== -->
             <template v-if="activeTab === 'reviews'">
-                <div class="shop-reviews-section">
+                <div class="shop-reviews-section shop-reveal">
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
                         <!-- Rating Summary -->
                         <div>
@@ -254,7 +269,7 @@
 
             <!-- ===== ABOUT SHOP TAB ===== -->
             <template v-if="activeTab === 'about'">
-                <div class="shop-about-section">
+                <div class="shop-about-section shop-reveal">
                     <h2 class="shop-section-title">{{ $t('About Shop') }}</h2>
                     <div class="shop-about-content" v-if="shop?.description">
                         <div v-html="shop?.description"></div>
@@ -265,7 +280,7 @@
 
             <!-- ===== SHOP POLICIES TAB ===== -->
             <template v-if="activeTab === 'policies'">
-                <div class="shop-about-section">
+                <div class="shop-about-section shop-reveal">
                     <h2 class="shop-section-title">{{ $t('Shop Policies') }}</h2>
                     <p class="shop-empty-text">{{ $t('No policies available yet') }}</p>
                 </div>
@@ -273,7 +288,7 @@
 
             <!-- ===== CONTACT TAB ===== -->
             <template v-if="activeTab === 'contact'">
-                <div class="shop-about-section">
+                <div class="shop-about-section shop-reveal">
                     <h2 class="shop-section-title">{{ $t('Contact') }}</h2>
                     <div v-if="shop?.address || shop?.phone || shop?.email" class="shop-contact-info">
                         <div v-if="shop?.address" class="shop-contact-row">
@@ -312,7 +327,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid';
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -422,6 +437,76 @@ const fetchCategories = async () => {
         isLoadingCategories.value = false;
     });
 };
+
+// ---- Sliding underline for the tabs ----
+const tabEls = {};
+const tabIndicator = ref({ x: 0, w: 0, ready: false });
+let tabResizeObserver = null;
+
+const setTabEl = (key, el) => {
+    if (el) {
+        tabEls[key] = el;
+        tabResizeObserver?.observe(el);
+    } else {
+        delete tabEls[key];
+    }
+};
+
+const updateTabIndicator = () => {
+    const el = tabEls[activeTab.value];
+    if (!el) return;
+    const inset = window.innerWidth < 768 ? 10 : 16;
+    tabIndicator.value = {
+        ...tabIndicator.value,
+        x: el.offsetLeft + inset,
+        w: Math.max(0, el.offsetWidth - inset * 2),
+    };
+};
+
+watch(activeTab, () => nextTick(updateTabIndicator));
+
+// ---- Sticky toolbar (sits right under the sticky navbar) ----
+const toolbarEl = ref(null);
+const isToolbarStuck = ref(false);
+let stickyTicking = false;
+
+const updateStickyState = () => {
+    stickyTicking = false;
+    const header = document.querySelector('header.sticky');
+    const top = header ? Math.round(header.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty('--shop-sticky-top', `${top}px`);
+    const el = toolbarEl.value;
+    isToolbarStuck.value = !!el && el.getBoundingClientRect().top <= top + 1 && window.scrollY > 0;
+};
+
+const onStickyScroll = () => {
+    if (stickyTicking) return;
+    stickyTicking = true;
+    requestAnimationFrame(updateStickyState);
+};
+
+onMounted(() => {
+    if (typeof ResizeObserver !== 'undefined') {
+        tabResizeObserver = new ResizeObserver(updateTabIndicator);
+        Object.values(tabEls).forEach((el) => tabResizeObserver.observe(el));
+    }
+    nextTick(() => {
+        updateTabIndicator();
+        requestAnimationFrame(() => {
+            tabIndicator.value = { ...tabIndicator.value, ready: true };
+        });
+    });
+    window.addEventListener('scroll', onStickyScroll, { passive: true });
+    window.addEventListener('resize', onStickyScroll);
+    updateStickyState();
+});
+
+onBeforeUnmount(() => {
+    tabResizeObserver?.disconnect();
+    window.removeEventListener('scroll', onStickyScroll);
+    window.removeEventListener('resize', onStickyScroll);
+    document.documentElement.style.removeProperty('--shop-sticky-top');
+});
 
 // Global "snake" line across all category pills.
 // One animated CSS variable (--cat-snake-x) lives on the track and is inherited by every pill;
@@ -737,15 +822,102 @@ const shareShop = async () => {
     font-weight: 600;
 }
 
-.shop-tab-active::after {
-    content: '';
+/* One underline that glides between tabs (position set from JS) */
+.shop-tabs-scroll {
+    position: relative;
+}
+
+.shop-tab-indicator {
     position: absolute;
+    left: 0;
     bottom: 0;
-    left: 16px;
-    right: 16px;
     height: 3px;
     background: linear-gradient(90deg, #FF6B00, #FF8C3A);
     border-radius: 3px 3px 0 0;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, width;
+}
+
+.shop-tab-indicator.is-ready {
+    opacity: 1;
+    transition:
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================
+   ENTRANCE ANIMATIONS
+   ========================================== */
+
+@keyframes shopFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes shopHeadingSwap {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.shop-reveal {
+    animation: shopFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--d, 0s);
+}
+
+.shop-heading-swap {
+    animation: shopHeadingSwap 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shop-reveal,
+    .shop-heading-swap {
+        animation: none;
+    }
+    .shop-tab-indicator.is-ready {
+        transition: none;
+    }
+}
+
+/* ==========================================
+   STICKY TOOLBAR (search / sort / categories)
+   ========================================== */
+
+.shop-toolbar {
+    position: sticky;
+    top: var(--shop-sticky-top, 0px);
+    z-index: 20;
+    background: #FAFAFA;
+    padding-top: 8px;
+    margin-top: -8px;
+    transition: box-shadow 0.25s ease;
+}
+
+.shop-toolbar.is-stuck {
+    box-shadow: 0 10px 14px -12px rgba(0, 0, 0, 0.22);
+}
+
+.shop-toolbar .shop-categories-scroll {
+    margin-bottom: 0;
+    padding-bottom: 18px;
+    /* The toolbar spans the full container, so the pill row needs its own
+       bounded width or it never overflows and can't be swiped. */
+    min-width: 0;
+    max-width: 100%;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
 }
 
 .tab-label-short {
@@ -1359,11 +1531,6 @@ const shareShop = async () => {
 
     .tab-label-short {
         display: inline;
-    }
-
-    .shop-tab-active::after {
-        left: 10px;
-        right: 10px;
     }
 
     /* Search + sort + view toggle on one row, like the reference */
