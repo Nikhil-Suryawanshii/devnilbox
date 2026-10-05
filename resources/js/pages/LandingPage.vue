@@ -535,7 +535,7 @@
                     </span>
                 </div>
 
-                <div class="mb-10 -mx-1 overflow-x-auto px-1 pb-2">
+                <div class="landing-cat-scroll mb-10 -mx-1 overflow-x-auto px-1 pb-2">
                     <div class="landing-cat-track flex w-max gap-2" :ref="setLandingCatTrack">
                     <button type="button"
                         class="landing-cat-pill inline-flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-3 pr-4 text-sm font-semibold transition sm:pr-5"
@@ -955,6 +955,16 @@ const showProductDetails = (product) => {
     syntax: '<length>';
     inherits: true;
     initial-value: -140px;
+}
+
+.landing-cat-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.landing-cat-scroll::-webkit-scrollbar {
+    display: none;
 }
 
 .landing-cat-track {
