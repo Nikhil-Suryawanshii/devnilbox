@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="routerName !== 'checkout' && routerName !== 'blogs' && routerName !== 'blog-details'"
-            class="w-[72px] bg-white shadow border-t border-b border-primary flex-col justify-start items-center gap-1 fixed top-1/2 -translate-y-1/2 z-10 overflow-hidden cursor-pointer hidden sm:flex"
+            class="w-[72px] bg-white shadow border-t border-b border-primary flex-col justify-start items-center gap-1 fixed top-1/2 -translate-y-1/2 z-40 overflow-hidden cursor-pointer hidden sm:flex"
             :class="master.langDirection == 'rtl' ? 'left-0 border-r rounded-r-[10px]' : 'right-0 border-l rounded-l-[10px]'"
             @click="showCardCanvas()">
             <div class="pt-2 pb-0.5 flex flex-col items-center gap-1 justify-center">
@@ -17,7 +17,7 @@
         </div>
 
         <TransitionRoot as="template" :show="master.basketCanvas">
-            <Dialog as="div" class="relative z-10" @close="showCardCanvas()">
+            <Dialog as="div" class="relative z-[250]" @close="showCardCanvas()">
                 <TransitionChild as="template" enter="ease-in-out duration-500" enter-from="opacity-0"
                     enter-to="opacity-100" leave="ease-in-out duration-500" leave-from="opacity-100"
                     leave-to="opacity-0">

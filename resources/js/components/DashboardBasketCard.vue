@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot as="template" :show="master.basketCanvas">
-            <Dialog as="div" class="relative z-10" @close="showCardCanvas()">
+            <Dialog as="div" class="relative z-[250]" @close="showCardCanvas()">
                 <TransitionChild as="template" enter="ease-in-out duration-500" enter-from="opacity-0"
                     enter-to="opacity-100" leave="ease-in-out duration-500" leave-from="opacity-100"
                     leave-to="opacity-0">
