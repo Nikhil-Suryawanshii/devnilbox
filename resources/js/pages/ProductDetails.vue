@@ -90,7 +90,7 @@
 
                             <span
                                 v-if="displayDiscount > 0"
-                                class="absolute top-4 left-4 z-10 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg"
+                                class="discount-badge"
                             >
                                 {{ displayDiscount }}% {{ $t('OFF') }}
                             </span>
@@ -1145,6 +1145,31 @@ onUnmounted(() => clearInterval(countdownInterval));
 </script>
 
 <style scoped>
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: calc(100% - 20px);
+    height: auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+}
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.2s ease;

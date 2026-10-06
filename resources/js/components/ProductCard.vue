@@ -17,13 +17,6 @@
             />
         </div>
 
-        <div 
-            v-if="props.product?.discount_percentage > 0"
-            class="absolute top-3 left-3 px-2.5 py-1 bg-red-500 text-white text-[11px] font-black uppercase tracking-wider rounded-full shadow-sm z-10"
-        >
-            {{ props.product?.discount_percentage }}% {{ $t('OFF') }}
-        </div>
-
         <button 
             class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 z-10"
             :class="props.product?.is_favorite ? 'opacity-100' : 'sm:opacity-0 group-hover:opacity-100 focus:opacity-100'"
@@ -44,12 +37,21 @@
 
         <div class="p-4 flex flex-col flex-grow justify-between">
             <div class="space-y-2 cursor-pointer" @click="showProductDetails">
-                <h3 
-                    class="text-slate-900 text-sm font-semibold tracking-tight line-clamp-2 min-h-[40px] group-hover:text-orange-500 transition-colors"
-                    :class="props.product?.quantity > 0 ? '' : 'opacity-50'"
-                >
-                    {{ props.product?.name }}
-                </h3>
+                <div class="flex items-center gap-2 min-h-[1.25rem]">
+                    <h3
+                        class="min-w-0 flex-1 truncate text-slate-900 text-sm font-semibold tracking-tight group-hover:text-orange-500 transition-colors"
+                        :class="props.product?.quantity > 0 ? '' : 'opacity-50'"
+                    >
+                        {{ props.product?.name }}
+                    </h3>
+                    <span
+                        v-if="props.product?.discount_percentage > 0"
+                        class="discount-badge"
+                        :class="{ 'is-decimal': isDecimalDiscount(props.product?.discount_percentage) }"
+                    >
+                        {{ props.product?.discount_percentage }}% {{ $t('OFF') }}
+                    </span>
+                </div>
 
                 <div class="flex items-center gap-1.5 text-xs">
                     <div class="flex items-center gap-0.5 font-bold text-slate-800">
@@ -114,6 +116,30 @@
 </template>
 
 <style scoped>
+/* Compact chip beside the title. Decimals use a smaller size so the title is not pushed. */
+.discount-badge {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 46%;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.discount-badge.is-decimal {
+    padding: 2px 6px;
+    font-size: 9px;
+    letter-spacing: -0.03em;
+}
+
 @keyframes badgePulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
@@ -150,6 +176,11 @@ const toast = useToast();
 const props = defineProps({
     product: Object
 });
+
+const isDecimalDiscount = (value) => {
+    const amount = Number(value);
+    return Number.isFinite(amount) && !Number.isInteger(amount);
+};
 
 const orderData = {
     is_buy_now: false,
