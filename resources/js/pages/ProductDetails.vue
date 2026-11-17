@@ -13,80 +13,140 @@
 
                     <!-- Step 02: Gallery -->
                     <div class="lg:col-span-7 xl:col-span-8">
-                        <div class="group relative product-main-image-box w-full h-[420px] sm:h-[520px] md:h-[650px] lg:h-[660px] max-h-[680px] rounded-3xl overflow-hidden bg-slate-50 p-4 sm:p-5 md:p-6 flex items-center justify-center">
-                            <swiper
+                        <div ref="galleryBoxRef" class="group relative product-main-image-box w-full h-[420px] sm:h-[520px] md:h-[650px] lg:h-[660px] max-h-[680px] rounded-3xl overflow-hidden bg-slate-50 p-4 sm:p-5 md:p-6 flex items-center justify-center">
+
+                            <!-- ── Custom 3D-transition image viewer ── -->
+                            <div
                                 v-if="galleryThumbs.length"
-                                :key="`main-${product.id}`"
-                                :modules="[Navigation]"
-                                :navigation="galleryThumbs.length > 1"
-                                :initial-slide="selectedThumbIndex"
-                                class="product-main-swiper h-full w-full"
-                                @swiper="onMainSwiper"
-                                @slide-change="onMainSlideChange"
+                                class="pv-stage"
+                                aria-live="polite"
                             >
-                                <swiper-slide
-                                    v-for="(thumb, index) in galleryThumbs"
-                                    :key="`${thumb.id || index}-${index}`"
+                                <!-- Outgoing layer (animates down + fade out) -->
+                                <div
+                                    v-if="transitionActive && outgoingThumb"
+                                    class="pv-layer pv-layer--out"
+                                    :key="'out-' + (outgoingThumb?.id ?? outgoingKey) + '-' + outgoingKey"
                                 >
+                                    <!-- Outgoing: regular image -->
+                                    <img
+                                        v-if="outgoingThumb.thumbnail"
+                                        :src="outgoingThumb.thumbnail"
+                                        class="product-main-image"
+                                        :alt="product.name"
+                                        draggable="false"
+                                    />
+                                    <!-- Outgoing: video thumb placeholder -->
                                     <div
-                                        class="h-full w-full flex items-center justify-center cursor-pointer"
-                                        @click="showGallery = true"
+                                        v-else-if="isVideoThumb(outgoingThumb)"
+                                        class="relative h-full w-full overflow-hidden bg-slate-950"
                                     >
                                         <img
-                                            v-if="thumb.thumbnail"
-                                            :src="thumb.thumbnail"
-                                            class="product-main-image max-w-full max-h-full w-auto h-auto object-contain"
-                                            :alt="product.name"
+                                            v-if="videoPoster"
+                                            :src="videoPoster"
+                                            class="absolute inset-0 w-full h-full object-cover opacity-50"
+                                            alt=""
                                         />
-                                        <div
-                                            v-else-if="isVideoThumb(thumb)"
-                                            class="relative h-full w-full overflow-hidden bg-slate-950"
-                                            @click.stop
-                                        >
-                                            <template v-if="!mainVideoPlaying">
-                                                <img
-                                                    v-if="videoPoster"
-                                                    :src="videoPoster"
-                                                    class="absolute inset-0 w-full h-full object-cover opacity-50"
-                                                    alt=""
-                                                />
-                                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25" />
-                                                <button
-                                                    type="button"
-                                                    class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 group"
-                                                    @click="playMainVideo"
-                                                >
-                                                    <span
-                                                        class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-orange-500 text-white shadow-xl shadow-orange-500/40 ring-4 ring-white/25 flex items-center justify-center transition-transform group-hover:scale-105"
-                                                    >
-                                                        <svg class="w-7 h-7 md:w-8 md:h-8 ml-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M8 5.14v13.72L19 12 8 5.14z" />
-                                                        </svg>
-                                                    </span>
-                                                    <span class="text-sm font-bold uppercase tracking-[0.2em] text-white">
-                                                        {{ $t('Video') }}
-                                                    </span>
-                                                </button>
-                                            </template>
-                                            <video
-                                                v-else
-                                                ref="mainVideoEl"
-                                                class="relative z-10 w-full h-full object-contain bg-black"
-                                                controls
-                                                playsinline
-                                                autoplay
-                                                :src="thumb.url"
-                                                :poster="videoPoster || undefined"
-                                            />
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25" />
+                                        <div class="relative z-10 h-full flex items-center justify-center">
+                                            <span class="w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center">
+                                                <svg class="w-7 h-7 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72L19 12 8 5.14z" /></svg>
+                                            </span>
                                         </div>
-                                        <div
-                                            v-else-if="thumb.url"
-                                            class="w-full h-full overflow-hidden"
-                                            v-html="thumb.url"
-                                        ></div>
                                     </div>
-                                </swiper-slide>
-                            </swiper>
+                                </div>
+
+                                <!-- Incoming / static layer -->
+                                <div
+                                    class="pv-layer"
+                                    :class="transitionActive ? 'pv-layer--in' : 'pv-layer--static'"
+                                    :key="'in-' + (currentThumb?.id ?? incomingKey) + '-' + incomingKey"
+                                >
+                                    <!-- Current: regular image -->
+                                    <img
+                                        v-if="currentThumb && currentThumb.thumbnail"
+                                        :src="currentThumb.thumbnail"
+                                        class="product-main-image cursor-pointer"
+                                        :alt="product.name"
+                                        draggable="false"
+                                        @click="stopAutoplay(); showGallery = true"
+                                    />
+                                    <!-- Current: video thumb -->
+                                    <div
+                                        v-else-if="currentThumb && isVideoThumb(currentThumb)"
+                                        class="relative h-full w-full overflow-hidden bg-slate-950"
+                                        @click.stop
+                                    >
+                                        <template v-if="!mainVideoPlaying">
+                                            <img
+                                                v-if="videoPoster"
+                                                :src="videoPoster"
+                                                class="absolute inset-0 w-full h-full object-cover opacity-50"
+                                                alt=""
+                                            />
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25" />
+                                            <button
+                                                type="button"
+                                                class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 group"
+                                                @click="playMainVideo"
+                                            >
+                                                <span class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-orange-500 text-white shadow-xl shadow-orange-500/40 ring-4 ring-white/25 flex items-center justify-center transition-transform group-hover:scale-105">
+                                                    <svg class="w-7 h-7 md:w-8 md:h-8 ml-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                        <path d="M8 5.14v13.72L19 12 8 5.14z" />
+                                                    </svg>
+                                                </span>
+                                                <span class="text-sm font-bold uppercase tracking-[0.2em] text-white">
+                                                    {{ $t('Video') }}
+                                                </span>
+                                            </button>
+                                        </template>
+                                        <video
+                                            v-else
+                                            ref="mainVideoEl"
+                                            class="relative z-10 w-full h-full object-contain bg-black"
+                                            controls
+                                            playsinline
+                                            autoplay
+                                            :src="currentThumb.url"
+                                            :poster="videoPoster || undefined"
+                                        />
+                                    </div>
+                                    <!-- Current: embedded html -->
+                                    <div
+                                        v-else-if="currentThumb && currentThumb.url"
+                                        class="w-full h-full overflow-hidden"
+                                        v-html="currentThumb.url"
+                                    ></div>
+                                </div>
+
+                                <!-- Prev arrow -->
+                                <button
+                                    v-if="galleryThumbs.length > 1"
+                                    type="button"
+                                    class="pv-nav pv-nav--prev"
+                                    :disabled="transitionActive"
+                                    @click="navigatePrev"
+                                    :aria-label="$t('Previous')"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                <!-- Next arrow -->
+                                <button
+                                    v-if="galleryThumbs.length > 1"
+                                    type="button"
+                                    class="pv-nav pv-nav--next"
+                                    :disabled="transitionActive"
+                                    @click="navigateNext"
+                                    :aria-label="$t('Next')"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- ── / custom viewer ── -->
 
                             <span
                                 v-if="displayDiscount > 0"
@@ -143,7 +203,7 @@
                                 v-if="hasVideoThumb"
                                 type="button"
                                 @click="openVideoSlide"
-                                class="absolute bottom-14 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1.5"
+                                class="absolute bottom-14 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1.5 z-10"
                             >
                                 ▶ {{ $t('Watch Video') }}
                             </button>
@@ -151,8 +211,8 @@
                             <button
                                 v-if="galleryThumbs.length > 1"
                                 type="button"
-                                @click="showGallery = true"
-                                class="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1.5"
+                                @click="stopAutoplay(); showGallery = true"
+                                class="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1.5 z-10"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/>
@@ -163,13 +223,15 @@
 
                         <div
                             v-if="galleryThumbs.length > 1"
-                            class="flex items-center gap-3 overflow-x-auto pb-2 mt-3"
+                            ref="thumbStripRef"
+                            class="flex items-center gap-3 overflow-x-auto pb-2 mt-3 scroll-smooth"
                         >
                             <button
                                 v-for="(thumb, index) in galleryThumbs"
                                 :key="`strip-${thumb.id || index}`"
+                                :ref="(el) => { if (el) thumbButtonRefs[index] = el }"
                                 type="button"
-                                @click="selectThumb(index, { syncColor: true })"
+                                @click="stopAutoplay(); selectThumb(index, { syncColor: true })"
                                 class="w-20 h-20 flex-shrink-0 border-2 rounded-2xl overflow-hidden"
                                 :class="[
                                     selectedThumbIndex === index
@@ -746,6 +808,11 @@ import PublicLayout from "../layouts/ProductPageLayout.vue";
 import "swiper/css";
 import "swiper/css/navigation";
 
+// ─── Transition: accessibility check ───────────────────────────────────────
+const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const { shareLink } = useShareLink();
 const showGallery = ref(false);
 const toast = useToast();
@@ -773,6 +840,55 @@ const selectedThumbnail = ref(null);
 const selectedThumbIndex = ref(0);
 const mainSwiper = ref(null);
 const syncingFromColor = ref(false);
+
+// ─── DOM refs for scroll-into-view behaviour ───────────────────────────────
+const galleryBoxRef = ref(null);    // the main image preview box
+const thumbStripRef = ref(null);    // the horizontal thumbnail strip
+const thumbButtonRefs = ref([]);    // individual thumbnail buttons (array)
+
+/**
+ * After selecting a new thumbnail:
+ *  1. Scroll the active thumbnail into view within the horizontal strip.
+ *  2. If the gallery preview box is above the current viewport (user scrolled
+ *     down below the image), scroll the page back up so it's visible.
+ */
+const scrollActiveThumb = (index) => {
+    nextTick(() => {
+        // 1. Scroll the thumbnail strip so the active button is visible
+        const btn = thumbButtonRefs.value[index];
+        if (btn) {
+            btn.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center',
+            });
+        }
+
+        // 2. If the user manually clicked a thumbnail and the gallery box is out of view,
+        //    bring it back into view so the transition is visible (skip during autoplay).
+        if (!autoplayActive.value) {
+            const box = galleryBoxRef.value;
+            if (box) {
+                const rect = box.getBoundingClientRect();
+                const isAboveViewport = rect.bottom < 80; // 80px = rough navbar height
+                if (isAboveViewport) {
+                    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+    });
+};
+
+// ─── 3-D image transition state ────────────────────────────────────────────
+const transitionActive = ref(false);
+const outgoingThumb = ref(null);
+const outgoingKey = ref(0);   // bumped each transition so Vue re-keyes the layer
+const incomingKey = ref(0);   // bumped each transition so Vue re-keyes the incoming layer
+let transitionTimer = null;
+
+const TRANSITION_DURATION = 650; // ms — matches CSS animation duration
+
+const currentThumb = computed(() => galleryThumbs.value[selectedThumbIndex.value] ?? null);
 const activeTab = ref("overview");
 const flashSale = ref(null);
 const averageRatings = ref({});
@@ -808,6 +924,7 @@ const mainVideoPlaying = ref(false);
 const mainVideoEl = ref(null);
 
 const playMainVideo = async () => {
+    stopAutoplay();
     mainVideoPlaying.value = true;
     await nextTick();
     try {
@@ -915,20 +1032,108 @@ const selectThumb = (index, { syncColor = false } = {}) => {
     const thumbs = galleryThumbs.value;
     if (!thumbs.length) return;
     const safeIndex = Math.max(0, Math.min(index, thumbs.length - 1));
-    if (safeIndex !== selectedThumbIndex.value) stopMainVideo();
-    selectedThumbIndex.value = safeIndex;
-    selectedThumbnail.value = thumbs[safeIndex]?.thumbnail || null;
-    if (mainSwiper.value && mainSwiper.value.activeIndex !== safeIndex) {
-        mainSwiper.value.slideTo(safeIndex);
+    if (safeIndex === selectedThumbIndex.value) return; // same slide — no-op
+
+    stopMainVideo();
+
+    // ── 3D transition logic ─────────────────────────────────────────────
+    if (!prefersReducedMotion) {
+        // Cancel any in-flight transition so rapid clicks don't break state
+        if (transitionTimer !== null) {
+            clearTimeout(transitionTimer);
+            transitionTimer = null;
+            transitionActive.value = false;
+            outgoingThumb.value = null;
+        }
+
+        // Snapshot the currently visible thumb as the outgoing layer
+        outgoingThumb.value = thumbs[selectedThumbIndex.value] ?? null;
+        outgoingKey.value++;
+        incomingKey.value++;
+        transitionActive.value = true;
+
+        // Advance the index — Vue will render the incoming slide immediately
+        selectedThumbIndex.value = safeIndex;
+        selectedThumbnail.value = thumbs[safeIndex]?.thumbnail || null;
+
+        // After the CSS animation finishes, clean up the outgoing layer
+        transitionTimer = setTimeout(() => {
+            transitionActive.value = false;
+            outgoingThumb.value = null;
+            transitionTimer = null;
+        }, TRANSITION_DURATION + 50); // slight buffer so the animation fully completes
+    } else {
+        // Reduced motion: instant swap
+        selectedThumbIndex.value = safeIndex;
+        selectedThumbnail.value = thumbs[safeIndex]?.thumbnail || null;
     }
+    // ── /transition logic ───────────────────────────────────────────────
+
     if (syncColor && product.value.colors?.length) {
         const colorIdx = colorIndexForSlide(safeIndex);
         if (colorIdx >= 0 && product.value.colors[colorIdx]) {
             formData.value.color = product.value.colors[colorIdx].id;
         }
     }
+
+    // Scroll the active thumbnail into view + bring gallery box back if needed
+    scrollActiveThumb(safeIndex);
 };
 
+/** Navigate to previous gallery item — also stops autoplay */
+const navigatePrev = () => {
+    stopAutoplay();
+    const len = galleryThumbs.value.length;
+    if (!len) return;
+    const prev = (selectedThumbIndex.value - 1 + len) % len;
+    selectThumb(prev, { syncColor: true });
+};
+
+/** Navigate to next gallery item — also stops autoplay */
+const navigateNext = () => {
+    stopAutoplay();
+    const len = galleryThumbs.value.length;
+    if (!len) return;
+    const next = (selectedThumbIndex.value + 1) % len;
+    selectThumb(next, { syncColor: true });
+};
+
+// ─── Auto-slideshow ─────────────────────────────────────────────────────────
+let autoplayInterval = null;
+const autoplayActive = ref(false);
+const AUTOPLAY_DELAY = 3500; // ms between slides
+
+/** Advance one slide (internal — does NOT stop autoplay) */
+const autoplayStep = () => {
+    if (transitionActive.value) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+    const len = galleryThumbs.value.length;
+    if (!len || len <= 1) { stopAutoplay(); return; }
+    // Skip if currently on a video slide — pause there instead
+    if (isVideoThumb(currentThumb.value)) { return; }
+    const next = (selectedThumbIndex.value + 1) % len;
+    selectThumb(next, { syncColor: false });
+};
+
+/** Start the auto-slideshow. Only runs if there are ≥2 image slides. */
+const startAutoplay = () => {
+    clearInterval(autoplayInterval);
+    const len = galleryThumbs.value.length;
+    if (!len || len <= 1) return;
+    autoplayActive.value = true;
+    autoplayInterval = setInterval(autoplayStep, AUTOPLAY_DELAY);
+};
+
+/** Stop the auto-slideshow permanently (user has taken control). */
+const stopAutoplay = () => {
+    if (autoplayInterval !== null) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+    }
+    autoplayActive.value = false;
+};
+
+// These Swiper callbacks are kept for the lightbox gallery Swiper (not used by main viewer).
 const onMainSwiper = (swiper) => {
     mainSwiper.value = swiper;
     if (selectedThumbIndex.value > 0) swiper.slideTo(selectedThumbIndex.value, 0);
@@ -948,6 +1153,7 @@ const onMainSlideChange = (swiper) => {
 };
 
 const selectColor = (color, index) => {
+    stopAutoplay();
     formData.value.color = color.id;
     if (!galleryThumbs.value.length) return;
     syncingFromColor.value = true;
@@ -958,6 +1164,7 @@ const selectColor = (color, index) => {
 };
 
 const openVideoSlide = () => {
+    stopAutoplay();
     const idx = galleryThumbs.value.findIndex((t) => isVideoThumb(t));
     if (idx >= 0) selectThumb(idx);
 };
@@ -1115,11 +1322,15 @@ const fetchProductDetails = () => {
             mainVideoPlaying.value = false;
             selectedThumbnail.value = product.value?.thumbnails?.[0]?.thumbnail || null;
             mainSwiper.value = null;
+            thumbButtonRefs.value = [];
             if (flashSale.value) startCountdown();
             formData.value.color = product.value.colors?.length ? product.value.colors[0].id : null;
             formData.value.size = product.value.sizes?.length ? product.value.sizes[0].id : null;
             calculateProductPrice();
             isLoading.value = false;
+            nextTick(() => {
+                startAutoplay();
+            });
         })
         .catch(() => {
             isLoading.value = false;
@@ -1134,6 +1345,7 @@ onMounted(() => {
 watch(formData, () => calculateProductPrice(), { deep: true });
 
 watch(route, async () => {
+    stopAutoplay();
     await nextTick();
     window.scrollTo(0, 0);
     activeTab.value = "overview";
@@ -1141,7 +1353,11 @@ watch(route, async () => {
     fetchProductDetails();
 });
 
-onUnmounted(() => clearInterval(countdownInterval));
+onUnmounted(() => {
+    clearInterval(countdownInterval);
+    if (transitionTimer !== null) clearTimeout(transitionTimer);
+    stopAutoplay();
+});
 </script>
 
 <style scoped>
@@ -1178,6 +1394,165 @@ onUnmounted(() => clearInterval(countdownInterval));
 .fade-leave-to {
     opacity: 0;
 }
+
+/* ══════════════════════════════════════════════
+   Product Viewer — 3D Perspective Stage
+   ══════════════════════════════════════════════ */
+
+/**
+ * pv-stage: fills the parent rounded box (overflow:hidden is on the parent),
+ * establishes the 3D perspective for child layers.
+ */
+.pv-stage {
+    position: absolute;
+    inset: 0;
+    /* Perspective anchored at the vertical centre of the box */
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
+    overflow: hidden;
+}
+
+/**
+ * pv-layer: a full-size absolutely-positioned layer used for both
+ * the outgoing and incoming image during a transition, and as the
+ * static single layer when no transition is running.
+ * Each layer centres its image exactly as the old Swiper slide did.
+ */
+.pv-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Preserve 3D so rotateX works with the parent perspective */
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+    /* Prevent the image from bleeding outside the rounded box */
+    overflow: hidden;
+}
+
+/* Static layer — no animation, just centred display */
+.pv-layer--static {
+    animation: none;
+    transform: none;
+    opacity: 1;
+}
+
+/* ── Outgoing: slides down + shrinks + tilts backward + fades ── */
+.pv-layer--out {
+    z-index: 1;
+    animation: pv-slide-out 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ── Incoming: slides in from above + expands + un-tilts + fades in ── */
+.pv-layer--in {
+    z-index: 2;
+    animation: pv-slide-in 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes pv-slide-out {
+    0% {
+        opacity: 1;
+        transform: translateY(0%) scale(1) rotateX(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100%) scale(0.96) rotateX(-8deg);
+    }
+}
+
+@keyframes pv-slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%) scale(0.96) rotateX(8deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0%) scale(1) rotateX(0deg);
+    }
+}
+
+/* ── Prev / Next navigation arrows ── */
+.pv-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.90);
+    border: none;
+    cursor: pointer;
+    color: #f97316; /* orange-500 — matches existing swiper arrow colour */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.pv-nav:hover:not(:disabled) {
+    background: #f97316;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.40);
+}
+.pv-nav:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+.pv-nav--prev {
+    left: 12px;
+}
+.pv-nav--next {
+    right: 12px;
+}
+
+/* ── Product image sizing (same as before) ── */
+.product-main-image {
+    max-width: min(100%, 620px);
+    max-height: min(100%, 650px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+    /* Prevent the image itself from being dragged during a fast click */
+    user-select: none;
+}
+
+@media (max-width: 767px) {
+    .product-main-image {
+        max-width: min(100%, 100%);
+        max-height: min(100%, 380px);
+    }
+    .pv-nav {
+        width: 30px;
+        height: 30px;
+    }
+    .pv-nav--prev { left: 6px; }
+    .pv-nav--next { right: 6px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .product-main-image {
+        max-width: min(100%, 560px);
+        max-height: min(100%, 500px);
+    }
+}
+
+/* Respect reduced-motion — animations are skipped in JS already;
+   belt-and-suspenders CSS override. */
+@media (prefers-reduced-motion: reduce) {
+    .pv-layer--out,
+    .pv-layer--in {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* Keep Swiper styles for the lightbox gallery modal */
 .product-main-swiper {
     height: 100%;
     width: 100%;
@@ -1191,25 +1566,5 @@ onUnmounted(() => clearInterval(countdownInterval));
 .product-main-swiper :deep(.swiper-button-next),
 .product-main-swiper :deep(.swiper-button-prev) {
     color: #f97316;
-}
-.product-main-image {
-    max-width: min(100%, 620px);
-    max-height: min(100%, 650px);
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    object-position: center;
-}
-@media (max-width: 767px) {
-    .product-main-image {
-        max-width: min(100%, 100%);
-        max-height: min(100%, 380px);
-    }
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-    .product-main-image {
-        max-width: min(100%, 560px);
-        max-height: min(100%, 500px);
-    }
 }
 </style>
